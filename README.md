@@ -3,13 +3,13 @@
 ## 🔧 Технологии
 
 - Python 3.10+
-- Flask (или Django)
-- SQLAlchemy (ORM)
+- Flask
+- SQLAlchemy
 - SQLite
 - Bootstrap 5
-- Flask-Login / Django Auth
-- REST API (Flask RESTful / Django REST Framework)
-- PythonAnywhere / Render (деплой)
+- Flask-Login
+- REST API
+- PythonAnywhere
 
 ## 🚀 Возможности
 
