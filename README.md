@@ -38,5 +38,5 @@
 git clone https://github.com/yourusername/order-management-app.git
 cd order-management-app
 python -m venv venv
-source venv/bin/activate  # или venv\\Scripts\\activate на Windows
+venv\\Scripts\\activate
 pip install -r requirements.txt
