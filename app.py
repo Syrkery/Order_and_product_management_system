@@ -1,8 +1,13 @@
 from flask import Flask, render_template, g, request, redirect, url_for
 import sqlite3
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 DATABASE = 'database.sqlite3'
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def get_db():
     if 'db' not in g:
@@ -19,7 +24,7 @@ def close_db(error):
 @app.route('/')
 def index():
     db = get_db()
-    products = db.execute("""SELECT id, name, price, stock FROM products""").fetchall()
+    products = db.execute("""SELECT id, name, price, stock, image FROM Products""").fetchall()
     return render_template('index.html', products=products)
 
 @app.route('/add', methods=['GET', 'POST'])
@@ -28,8 +33,18 @@ def add_product():
         name = request.form['name']
         price = request.form['price']
         stock = request.form['stock']
+        image_file = request.files.get('image')
+        image_filename = ''
+
+        if image_file and image_file.filename:
+            filename = secure_filename(image_file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(image_path)
+            image_filename = filename
+
         db = get_db()
-        db.execute("""INSERT INTO products (name, price, stock) VALUES (?, ?, ?)""", (name, price, stock))
+        db.execute("""INSERT INTO Products (name, price, stock, image) VALUES (?, ?, ?, ?)""",
+                   (name, price, stock, image_filename))
         db.commit()
         return redirect(url_for('index'))
     return render_template('add_product.html')
