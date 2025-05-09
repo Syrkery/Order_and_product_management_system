@@ -9,11 +9,13 @@ UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
+
 
 @app.teardown_appcontext
 def close_db(error):
@@ -21,11 +23,13 @@ def close_db(error):
     if db is not None:
         db.close()
 
+
 @app.route('/')
 def index():
     db = get_db()
     products = db.execute("""SELECT id, name, price, stock, image FROM Products""").fetchall()
     return render_template('index.html', products=products)
+
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_product():
@@ -48,6 +52,7 @@ def add_product():
         db.commit()
         return redirect(url_for('index'))
     return render_template('add_product.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080, host='127.0.0.1')

@@ -7,7 +7,7 @@
 </head>
 <body class="container mt-4">
     <h1 class="mb-4">Добавление нового товара</h1>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <div class="mb-3">
             <label class="form-label">Название</label>
             <input type="text" name="name" class="form-control" required>
@@ -19,6 +19,10 @@
         <div class="mb-3">
             <label class="form-label">Остаток</label>
             <input type="number" name="stock" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Изображение</label>
+            <input type="file" name="image" class="form-control">
         </div>
         <button type="submit" class="btn btn-primary">Добавить</button>
         <a href="{{ url_for('index') }}" class="btn btn-secondary">Назад</a>
