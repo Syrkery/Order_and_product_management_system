@@ -15,10 +15,11 @@ def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
-@app.route("/")
+@app.route('/')
 def index():
     db = get_db()
-    return render_template("index.html")
+    products = db.execute("SELECT id, name, price, stock FROM Products").fetchall()
+    return render_template('index.html', products=products)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True, port=8080, host='127.0.0.1')
