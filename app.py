@@ -27,8 +27,21 @@ def close_db(error):
 @app.route('/')
 def index():
     db = get_db()
-    products = db.execute("""SELECT id, name, price, stock, image FROM Products""").fetchall()
-    return render_template('index.html', products=products)
+    query = 'SELECT id, name, price, stock, image FROM Products WHERE 1=1'
+    params = []
+
+    search = request.args.get('search', '').strip()
+    if search:
+        query += ' AND name LIKE ?'
+        params.append(f'%{search}%')
+
+    filter_stock = request.args.get('filter_stock')
+    if filter_stock == 'low':
+        query += ' AND stock < 5'
+
+    query += ' ORDER BY name ASC'
+    products = db.execute(query, params).fetchall()
+    return render_template('index.html', products=products, search=search, filter_stock=filter_stock)
 
 
 @app.route('/add', methods=['GET', 'POST'])
