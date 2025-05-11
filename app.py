@@ -27,7 +27,7 @@ def close_db(error):
 @app.route('/')
 def index():
     db = get_db()
-    query = 'SELECT id, name, price, stock, image FROM Products WHERE 1=1'
+    query = """SELECT id, name, price, stock, image FROM Products WHERE 1=1"""
     params = []
 
     search = request.args.get('search', '').strip()
@@ -60,7 +60,8 @@ def add_product():
             image_filename = filename
 
         db = get_db()
-        db.execute("""INSERT INTO Products (name, price, stock, image) VALUES (?, ?, ?, ?)""", (name, price, stock, image_filename))
+        db.execute("""INSERT INTO Products (name, price, stock, image) VALUES (?, ?, ?, ?)""",
+                   (name, price, stock, image_filename))
         db.commit()
         return redirect(url_for('index'))
     return render_template('add_product.html')
@@ -69,7 +70,7 @@ def add_product():
 @app.route('/edit/<int:product_id>', methods=['GET', 'POST'])
 def edit_product(product_id):
     db = get_db()
-    product = db.execute('SELECT * FROM Products WHERE id = ?', (product_id,)).fetchone()
+    product = db.execute("""SELECT * FROM Products WHERE id = ?""", (product_id,)).fetchone()
 
     if request.method == 'POST':
         name = request.form['name']
@@ -84,7 +85,7 @@ def edit_product(product_id):
             image_file.save(image_path)
             image_filename = filename
 
-        db.execute('UPDATE Products SET name = ?, price = ?, stock = ?, image = ? WHERE id = ?',
+        db.execute("""UPDATE Products SET name = ?, price = ?, stock = ?, image = ? WHERE id = ?""",
                    (name, price, stock, image_filename, product_id))
         db.commit()
         return redirect(url_for('index'))
@@ -95,12 +96,12 @@ def edit_product(product_id):
 @app.route('/delete/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
     db = get_db()
-    product = db.execute('SELECT image FROM Products WHERE id = ?', (product_id,)).fetchone()
+    product = db.execute("""SELECT image FROM Products WHERE id = ?""", (product_id,)).fetchone()
     if product and product['image']:
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], product['image'])
         if os.path.exists(image_path):
             os.remove(image_path)
-    db.execute('DELETE FROM Products WHERE id = ?', (product_id,))
+    db.execute("""DELETE FROM Products WHERE id = ?""", (product_id,))
     db.commit()
     return redirect(url_for('index'))
 
