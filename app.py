@@ -47,12 +47,23 @@ def add_product():
             image_filename = filename
 
         db = get_db()
-        db.execute("""INSERT INTO Products (name, price, stock, image) VALUES (?, ?, ?, ?)""",
-                   (name, price, stock, image_filename))
+        db.execute("""INSERT INTO Products (name, price, stock, image) VALUES (?, ?, ?, ?)""", (name, price, stock, image_filename))
         db.commit()
         return redirect(url_for('index'))
     return render_template('add_product.html')
 
+
+@app.route('/delete/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+    db = get_db()
+    product = db.execute('SELECT image FROM Products WHERE id = ?', (product_id,)).fetchone()
+    if product and product['image']:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], product['image'])
+        if os.path.exists(image_path):
+            os.remove(image_path)
+    db.execute('DELETE FROM Products WHERE id = ?', (product_id,))
+    db.commit()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080, host='127.0.0.1')
