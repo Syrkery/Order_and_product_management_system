@@ -53,6 +53,32 @@ def add_product():
     return render_template('add_product.html')
 
 
+@app.route('/edit/<int:product_id>', methods=['GET', 'POST'])
+def edit_product(product_id):
+    db = get_db()
+    product = db.execute('SELECT * FROM Products WHERE id = ?', (product_id,)).fetchone()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        price = request.form['price']
+        stock = request.form['stock']
+        image_file = request.files.get('image')
+        image_filename = product['image']
+
+        if image_file and image_file.filename:
+            filename = secure_filename(image_file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(image_path)
+            image_filename = filename
+
+        db.execute('UPDATE Products SET name = ?, price = ?, stock = ?, image = ? WHERE id = ?',
+                   (name, price, stock, image_filename, product_id))
+        db.commit()
+        return redirect(url_for('index'))
+
+    return render_template('edit_product.html', product=product)
+
+
 @app.route('/delete/<int:product_id>', methods=['POST'])
 def delete_product(product_id):
     db = get_db()
