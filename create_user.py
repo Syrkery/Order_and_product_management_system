@@ -9,7 +9,7 @@ cursor = conn.cursor()
 
 hashed = generate_password_hash(password)
 
-cursor.execute('INSERT INTO Users (email, password) VALUES (?, ?)', (email, hashed))
+cursor.execute("""INSERT INTO Users (email, password) VALUES (?, ?)""", (email, hashed))
 conn.commit()
 conn.close()
 
