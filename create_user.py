@@ -2,7 +2,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash
 
 email = 'admin@example.com'
-password = '12345'  # задай любой
+password = '12345'
 
 conn = sqlite3.connect('database.sqlite3')
 cursor = conn.cursor()
