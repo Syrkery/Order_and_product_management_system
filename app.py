@@ -1,6 +1,7 @@
 from flask import Flask, render_template, g, request, redirect, url_for, session, flash
 import sqlite3
 import os
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 
@@ -24,6 +25,11 @@ def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+@app.template_filter('strptime')
+def strptime_filter(s, fmt):
+    return datetime.strptime(s, fmt)
+
 
 
 def login_required(view):
@@ -98,9 +104,13 @@ def add_product():
             image_filename = filename
 
         db = get_db()
-        db.execute("""INSERT INTO Products (name, price, stock, image, category_id) VALUES (?, ?, ?, ?, ?)""",
-                   (name, price, stock, image_filename, category_id))
+        created_at = datetime.now().isoformat()
+
+        db.execute(
+            'INSERT INTO Products (name, price, stock, image, category_id, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            (name, price, stock, image_filename, category_id, created_at))
         db.commit()
+        flash('Товар добавлен.', 'success')
         return redirect(url_for('index'))
     return render_template('add_product.html', categories=categories)
 
@@ -126,12 +136,15 @@ def edit_product(product_id):
             image_file.save(image_path)
             image_filename = filename
 
+        updated_at = datetime.now().isoformat()
+
         db.execute("""
                     UPDATE Products
-                    SET name = ?, price = ?, stock = ?, image = ?, category_id = ?
+                    SET name = ?, price = ?, stock = ?, image = ?, category_id = ?, updated_at = ?
                     WHERE id = ?
-                """, (name, price, stock, image_filename, category_id, product_id))
+                """, (name, price, stock, image_filename, category_id, updated_at, product_id))
         db.commit()
+        flash('Изменения сохранены.', 'success')
         return redirect(url_for('index'))
 
     return render_template('edit_product.html', product=product, categories=categories)
@@ -148,6 +161,7 @@ def delete_product(product_id):
             os.remove(image_path)
     db.execute("""DELETE FROM Products WHERE id = ?""", (product_id,))
     db.commit()
+    flash('Товар удалён.', 'info')
     return redirect(url_for('index'))
 
 
@@ -164,6 +178,7 @@ def login():
             return redirect(url_for('index'))
         flash('Неверный email или пароль.', 'danger')
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():

@@ -17,6 +17,16 @@
         <p><strong>Категория:</strong> {{ product.category or '—' }}</p>
         <p><strong>Цена:</strong> {{ product.price }} ₽</p>
         <p><strong>Остаток:</strong> {{ product.stock }}</p>
+
+        {% if product.created_at %}
+            {% set created = product.created_at | replace('T', ' ') | strptime('%Y-%m-%d %H:%M:%S') %}
+            <p class="text-muted">Добавлен: {{ created.strftime('%-d %B %Y, %H:%M') }}</p>
+        {% endif %}
+        {% if product.updated_at %}
+            {% set updated = product.updated_at | replace('T', ' ') | strptime('%Y-%m-%d %H:%M:%S') %}
+            <p class="text-muted">Изменён: {{ updated.strftime('%-d %B %Y, %H:%M') }}</p>
+        {% endif %}
+
         <div class="mt-4">
             <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-warning">Редактировать</a>
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Назад</a>
