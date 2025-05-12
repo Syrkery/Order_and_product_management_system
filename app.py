@@ -1,9 +1,11 @@
-from flask import Flask, render_template, g, request, redirect, url_for
+from flask import Flask, render_template, g, request, redirect, url_for, session, flash
 import sqlite3
 import os
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
+app.secret_key = 'admin'
 DATABASE = 'database.sqlite3'
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -22,6 +24,17 @@ def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+
+def login_required(view):
+    from functools import wraps
+    @wraps(view)
+    def wrapped_view(**kwargs):
+        if 'user_id' not in session:
+            flash('Требуется авторизация.', 'warning')
+            return redirect(url_for('login'))
+        return view(**kwargs)
+    return wrapped_view
 
 
 @app.route('/')
@@ -50,6 +63,7 @@ def index():
 
 
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
 def add_product():
     db = get_db()
     categories = db.execute("""SELECT id, name FROM Categories ORDER BY name""").fetchall()
@@ -77,6 +91,7 @@ def add_product():
 
 
 @app.route('/edit/<int:product_id>', methods=['GET', 'POST'])
+@login_required
 def edit_product(product_id):
     db = get_db()
     product = db.execute("""SELECT * FROM Products WHERE id = ?""", (product_id,)).fetchone()
@@ -108,6 +123,7 @@ def edit_product(product_id):
 
 
 @app.route('/delete/<int:product_id>', methods=['POST'])
+@login_required
 def delete_product(product_id):
     db = get_db()
     product = db.execute("""SELECT image FROM Products WHERE id = ?""", (product_id,)).fetchone()
@@ -118,6 +134,28 @@ def delete_product(product_id):
     db.execute("""DELETE FROM Products WHERE id = ?""", (product_id,))
     db.commit()
     return redirect(url_for('index'))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        db = get_db()
+        user = db.execute("""SELECT * FROM Users WHERE email = ?""", (email,)).fetchone()
+        if user and check_password_hash(user['password'], password):
+            session['user_id'] = user['id']
+            flash('Вы вошли в систему.', 'success')
+            return redirect(url_for('index'))
+        flash('Неверный email или пароль.', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('Вы вышли из системы.', 'info')
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080, host='127.0.0.1')
