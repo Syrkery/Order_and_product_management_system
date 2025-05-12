@@ -71,12 +71,12 @@ def index():
 @app.route('/product/<int:product_id>')
 def view_product(product_id):
     db = get_db()
-    product = db.execute('''
+    product = db.execute("""
         SELECT Products.*, Categories.name AS category
         FROM Products
         LEFT JOIN Categories ON Products.category_id = Categories.id
         WHERE Products.id = ?
-    ''', (product_id,)).fetchone()
+    """, (product_id,)).fetchone()
     if product is None:
         flash('Товар не найден.', 'warning')
         return redirect(url_for('index'))
@@ -107,7 +107,7 @@ def add_product():
         created_at = datetime.now().isoformat()
 
         db.execute(
-            'INSERT INTO Products (name, price, stock, image, category_id, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+            """INSERT INTO Products (name, price, stock, image, category_id, created_at) VALUES (?, ?, ?, ?, ?, ?)""",
             (name, price, stock, image_filename, category_id, created_at))
         db.commit()
         flash('Товар добавлен.', 'success')
