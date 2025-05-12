@@ -34,6 +34,7 @@
             <tr>
                 <th>Изображение</th>
                 <th>Название</th>
+                <th>Категория</th>
                 <th>Цена (₽)</th>
                 <th>Остаток</th>
                 <th>Действия</th>
@@ -50,6 +51,7 @@
                     {% endif %}
                 </td>
                 <td>{{ product.name }}</td>
+                <td>{{ product.category or '—' }}</td>
                 <td>{{ product.price }}</td>
                 <td>{{ product.stock }}</td>
                 <td>

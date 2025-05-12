@@ -27,29 +27,38 @@ def close_db(error):
 @app.route('/')
 def index():
     db = get_db()
-    query = """SELECT id, name, price, stock, image FROM Products WHERE 1=1"""
+    query = """
+           SELECT Products.id, Products.name, Products.price, Products.stock, Products.image, Categories.name AS category
+           FROM Products
+           LEFT JOIN Categories ON Products.category_id = Categories.id
+           WHERE 1=1
+       """
     params = []
 
     search = request.args.get('search', '').strip()
     if search:
-        query += ' AND name LIKE ?'
+        query += ' AND Products.name LIKE ?'
         params.append(f'%{search}%')
 
     filter_stock = request.args.get('filter_stock')
     if filter_stock == 'low':
-        query += ' AND stock < 5'
+        query += ' AND Products.stock < 5'
 
-    query += ' ORDER BY name ASC'
+    query += ' ORDER BY Products.name ASC'
     products = db.execute(query, params).fetchall()
     return render_template('index.html', products=products, search=search, filter_stock=filter_stock)
 
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_product():
+    db = get_db()
+    categories = db.execute("""SELECT id, name FROM Categories ORDER BY name""").fetchall()
+
     if request.method == 'POST':
         name = request.form['name']
         price = request.form['price']
         stock = request.form['stock']
+        category_id = request.form['category'] or None
         image_file = request.files.get('image')
         image_filename = ''
 
@@ -60,22 +69,24 @@ def add_product():
             image_filename = filename
 
         db = get_db()
-        db.execute("""INSERT INTO Products (name, price, stock, image) VALUES (?, ?, ?, ?)""",
-                   (name, price, stock, image_filename))
+        db.execute("""INSERT INTO Products (name, price, stock, image, category_id) VALUES (?, ?, ?, ?, ?)""",
+                   (name, price, stock, image_filename, category_id))
         db.commit()
         return redirect(url_for('index'))
-    return render_template('add_product.html')
+    return render_template('add_product.html', categories=categories)
 
 
 @app.route('/edit/<int:product_id>', methods=['GET', 'POST'])
 def edit_product(product_id):
     db = get_db()
     product = db.execute("""SELECT * FROM Products WHERE id = ?""", (product_id,)).fetchone()
+    categories = db.execute("""SELECT id, name FROM Categories ORDER BY name""").fetchall()
 
     if request.method == 'POST':
         name = request.form['name']
         price = request.form['price']
         stock = request.form['stock']
+        category_id = request.form['category'] or None
         image_file = request.files.get('image')
         image_filename = product['image']
 
@@ -85,12 +96,15 @@ def edit_product(product_id):
             image_file.save(image_path)
             image_filename = filename
 
-        db.execute("""UPDATE Products SET name = ?, price = ?, stock = ?, image = ? WHERE id = ?""",
-                   (name, price, stock, image_filename, product_id))
+        db.execute("""
+                    UPDATE Products
+                    SET name = ?, price = ?, stock = ?, image = ?, category_id = ?
+                    WHERE id = ?
+                """, (name, price, stock, image_filename, category_id, product_id))
         db.commit()
         return redirect(url_for('index'))
 
-    return render_template('edit_product.html', product=product)
+    return render_template('edit_product.html', product=product, categories=categories)
 
 
 @app.route('/delete/<int:product_id>', methods=['POST'])

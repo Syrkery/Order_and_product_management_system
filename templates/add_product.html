@@ -13,6 +13,15 @@
             <input type="text" name="name" class="form-control" required>
         </div>
         <div class="mb-3">
+            <label class="form-label">Категория</label>
+            <select name="category" class="form-select">
+                <option value="">Без категории</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
             <label class="form-label">Цена (₽)</label>
             <input type="number" name="price" class="form-control" step="0.01" required>
         </div>
