@@ -62,6 +62,21 @@ def index():
     return render_template('index.html', products=products, search=search, filter_stock=filter_stock)
 
 
+@app.route('/product/<int:product_id>')
+def view_product(product_id):
+    db = get_db()
+    product = db.execute('''
+        SELECT Products.*, Categories.name AS category
+        FROM Products
+        LEFT JOIN Categories ON Products.category_id = Categories.id
+        WHERE Products.id = ?
+    ''', (product_id,)).fetchone()
+    if product is None:
+        flash('Товар не найден.', 'warning')
+        return redirect(url_for('index'))
+    return render_template('view_product.html', product=product)
+
+
 @app.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_product():
