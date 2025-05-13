@@ -1,9 +1,22 @@
 {% extends 'base.html' %}
 
-{% block title %}Список товаров{% endblock %}
+{% block title %}
+    {% if category_name %}
+        Товары в категории «{{ category_name }}»
+    {% else %}
+        Список товаров
+    {% endif %}
+{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Список товаров</h1>
+<h1 class="mb-4">
+    {% if category_name %}
+        Товары в категории «{{ category_name }}»
+    {% else %}
+        Список товаров
+    {% endif %}
+</h1>
+
 <a href="{{ url_for('add_product') }}" class="btn btn-success mb-3">Добавить товар</a>
 
 <form method="get" class="row mb-4">

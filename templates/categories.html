@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Категории{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список категорий</h1>
+
+{% if categories %}
+    <ul class="list-group">
+        {% for category in categories %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ category.name }}
+            <a href="{{ url_for('index') }}?search=&filter_stock=&category_id={{ category.id }}" class="btn btn-sm btn-outline-primary">Показать товары</a>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Категории отсутствуют.</p>
+{% endif %}
+{% endblock %}

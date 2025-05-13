@@ -63,9 +63,25 @@ def index():
     if filter_stock == 'low':
         query += ' AND Products.stock < 5'
 
+    category_id = request.args.get('category_id')
+    category_name = None
+    if category_id:
+        query += ' AND Products.category_id = ?'
+        params.append(category_id)
+        cat = db.execute("""SELECT name FROM Categories WHERE id = ?""", (category_id,)).fetchone()
+        if cat:
+            category_name = cat['name']
+
     query += ' ORDER BY Products.name ASC'
     products = db.execute(query, params).fetchall()
     return render_template('index.html', products=products, search=search, filter_stock=filter_stock)
+
+
+@app.route('/categories')
+def list_categories():
+    db = get_db()
+    categories = db.execute("""SELECT id, name FROM Categories ORDER BY name""").fetchall()
+    return render_template('categories.html', categories=categories)
 
 
 @app.route('/product/<int:product_id>')
