@@ -2,15 +2,17 @@ from flask import Flask, render_template, g, request, redirect, url_for, session
 import sqlite3
 import os
 from datetime import datetime
+from math import ceil
 from werkzeug.utils import secure_filename
-from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'admin'
+app.secret_key = 'your_secret_key_here'
 DATABASE = 'database.sqlite3'
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+PER_PAGE = 10
 
 
 def get_db():
@@ -26,10 +28,10 @@ def close_db(error):
     if db is not None:
         db.close()
 
+
 @app.template_filter('strptime')
 def strptime_filter(s, fmt):
     return datetime.strptime(s, fmt)
-
 
 
 def login_required(view):
@@ -47,11 +49,11 @@ def login_required(view):
 def index():
     db = get_db()
     query = """
-           SELECT Products.id, Products.name, Products.price, Products.stock, Products.image, Categories.name AS category
-           FROM Products
-           LEFT JOIN Categories ON Products.category_id = Categories.id
-           WHERE 1=1
-       """
+        SELECT Products.id, Products.name, Products.price, Products.stock, Products.image, Categories.name AS category
+        FROM Products
+        LEFT JOIN Categories ON Products.category_id = Categories.id
+        WHERE 1=1
+    """
     params = []
 
     search = request.args.get('search', '').strip()
@@ -72,9 +74,28 @@ def index():
         if cat:
             category_name = cat['name']
 
-    query += ' ORDER BY Products.name ASC'
+    total_query = """SELECT COUNT(*) FROM (""" + query + """)"""
+    total = db.execute(total_query, params).fetchone()[0]
+
+    page = int(request.args.get('page', 1))
+    pages = ceil(total / PER_PAGE)
+    offset = (page - 1) * PER_PAGE
+
+    query += ' ORDER BY Products.name ASC LIMIT ? OFFSET ?'
+    params.extend([PER_PAGE, offset])
+
     products = db.execute(query, params).fetchall()
-    return render_template('index.html', products=products, search=search, filter_stock=filter_stock)
+
+    return render_template(
+        'index.html',
+        products=products,
+        search=search,
+        filter_stock=filter_stock,
+        category_name=category_name,
+        page=page,
+        pages=pages,
+        total=total
+    )
 
 
 @app.route('/categories')
