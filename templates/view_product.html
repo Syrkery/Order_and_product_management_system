@@ -20,11 +20,15 @@
 
         {% if product.created_at %}
             {% set created = product.created_at | replace('T', ' ') | strptime('%Y-%m-%d %H:%M:%S') %}
-            <p class="text-muted">Добавлен: {{ created.strftime('%-d %B %Y, %H:%M') }}</p>
+            <p class="text-muted">
+                Добавлен: {{ created.strftime('%d').lstrip('0') }} {{ created.strftime('%B %Y, %H:%M') }}
+            </p>
         {% endif %}
         {% if product.updated_at %}
             {% set updated = product.updated_at | replace('T', ' ') | strptime('%Y-%m-%d %H:%M:%S') %}
-            <p class="text-muted">Изменён: {{ updated.strftime('%-d %B %Y, %H:%M') }}</p>
+            <p class="text-muted">
+                Изменён: {{ updated.strftime('%d').lstrip('0') }} {{ updated.strftime('%B %Y, %H:%M') }}
+            </p>
         {% endif %}
 
         <div class="mt-4">
