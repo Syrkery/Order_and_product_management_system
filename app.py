@@ -44,6 +44,20 @@ def login_required(view):
         return view(**kwargs)
     return wrapped_view
 
+@app.route('/clients', methods=['GET', 'POST'])
+@login_required
+def manage_clients():
+    db = get_db()
+    if request.method == 'POST':
+        name = request.form['name']
+        phone = request.form['phone']
+        db.execute("""INSERT INTO Clients (name, phone) VALUES (?, ?)""", (name, phone))
+        db.commit()
+        flash('Клиент добавлен.', 'success')
+        return redirect(url_for('manage_clients'))
+    clients = db.execute("""SELECT * FROM Clients ORDER BY name""").fetchall()
+    return render_template('clients.html', clients=clients)
+
 
 @app.route('/')
 def index():

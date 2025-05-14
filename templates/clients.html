@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Клиенты{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список клиентов</h1>
+
+<form method="post" class="row g-3 mb-4">
+    <div class="col-md-5">
+        <input type="text" name="name" class="form-control" placeholder="Имя клиента" required>
+    </div>
+    <div class="col-md-5">
+        <input type="text" name="phone" class="form-control" placeholder="Телефон" required>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-success w-100">Добавить</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Телефон</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for client in clients %}
+        <tr>
+            <td>{{ client.name }}</td>
+            <td>{{ client.phone }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
