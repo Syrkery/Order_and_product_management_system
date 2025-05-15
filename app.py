@@ -59,6 +59,20 @@ def manage_clients():
     return render_template('clients.html', clients=clients)
 
 
+@app.route('/clients/add', methods=['GET', 'POST'])
+@login_required
+def add_client():
+    db = get_db()
+    if request.method == 'POST':
+        name = request.form['name']
+        phone = request.form['phone']
+        db.execute("""INSERT INTO Clients (name, phone) VALUES (?, ?)""", (name, phone))
+        db.commit()
+        flash('Клиент добавлен.', 'success')
+        return redirect(url_for('manage_clients'))
+    return render_template('add_client.html')
+
+
 @app.route('/orders', methods=['GET', 'POST'])
 @login_required
 def create_order():
@@ -80,7 +94,7 @@ def create_order():
             qty = int(qty)
             if qty > 0:
                 cursor.execute("""
-                    INSERT INTO OrderItems (order_id, product_id, quantity)
+                    INSERT INTO Order_items (order_id, product_id, quantity)
                     VALUES (?, ?, ?)
                 """, (order_id, pid, qty))
                 cursor.execute("""
@@ -110,10 +124,10 @@ def list_orders():
     items_by_order = {}
     for order in orders:
         items = db.execute("""
-            SELECT Products.name, OrderItems.quantity
-            FROM OrderItems
-            LEFT JOIN Products ON OrderItems.product_id = Products.id
-            WHERE OrderItems.order_id = ?
+            SELECT Products.name, Order_items.quantity
+            FROM Order_items
+            LEFT JOIN Products ON Order_items.product_id = Products.id
+            WHERE Order_items.order_id = ?
         """, (order['id'],)).fetchall()
         items_by_order[order['id']] = items
 

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить клиента{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Добавление клиента</h1>
+
+<form method="post" class="w-50">
+    <div class="mb-3">
+        <label for="name" class="form-label">Имя</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label for="phone" class="form-label">Телефон</label>
+        <input type="text" name="phone" id="phone" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">Добавить</button>
+    <a href="{{ url_for('manage_clients') }}" class="btn btn-secondary">Назад</a>
+</form>
+{% endblock %}
