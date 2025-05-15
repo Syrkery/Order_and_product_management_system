@@ -2,6 +2,7 @@ from flask import Flask, render_template, g, request, redirect, url_for, session
 import sqlite3
 import os
 from datetime import datetime
+from functools import wraps
 from math import ceil
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -31,11 +32,12 @@ def close_db(error):
 
 @app.template_filter('strptime')
 def strptime_filter(s, fmt):
+    if '.' in s:
+        s = s.split('.')[0]
     return datetime.strptime(s, fmt)
 
 
 def login_required(view):
-    from functools import wraps
     @wraps(view)
     def wrapped_view(**kwargs):
         if 'user_id' not in session:
