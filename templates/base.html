@@ -1,29 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Товары{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>{% block title %}Главная{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-    <a class="navbar-brand" href="{{ url_for('index') }}">Склад</a>
-    <div class="ms-auto">
+<div class="container py-4">
+
+    <nav class="mb-4 d-flex justify-content-between align-items-center">
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">Товары</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('list_categories') }}" class="nav-link {% if request.path == '/categories' %}active{% endif %}">Категории</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('manage_clients') }}" class="nav-link {% if request.path == '/clients' %}active{% endif %}">Клиенты</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('add_client') }}" class="nav-link {% if request.path == '/clients/add' %}active{% endif %}">Добавить клиента</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('create_order') }}" class="nav-link {% if request.path == '/orders' %}active{% endif %}">Создать заказ</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ url_for('list_orders') }}" class="nav-link {% if request.path == '/orders/list' %}active{% endif %}">Список заказов</a>
+        </li>
+    </ul>
+    <div>
         {% if session.user_id %}
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Выйти</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Выйти</a>
         {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Войти</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm">Войти</a>
         {% endif %}
     </div>
 </nav>
 
-<div class="container mt-4">
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -31,5 +52,7 @@
 
     {% block content %}{% endblock %}
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
