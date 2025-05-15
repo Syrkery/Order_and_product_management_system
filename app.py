@@ -59,6 +59,43 @@ def manage_clients():
     return render_template('clients.html', clients=clients)
 
 
+@app.route('/orders', methods=['GET', 'POST'])
+@login_required
+def create_order():
+    db = get_db()
+    clients = db.execute("""SELECT id, name FROM Clients ORDER BY name""").fetchall()
+    products = db.execute("""SELECT id, name, price, stock FROM Products ORDER BY name""").fetchall()
+
+    if request.method == 'POST':
+        client_id = request.form['client']
+        selected_products = request.form.getlist('product')
+        quantities = request.form.getlist('quantity')
+
+        created_at = datetime.now().isoformat()
+        cursor = db.cursor()
+        cursor.execute("""INSERT INTO Orders (client_id, created_at) VALUES (?, ?)""", (client_id, created_at))
+        order_id = cursor.lastrowid
+
+        for pid, qty in zip(selected_products, quantities):
+            qty = int(qty)
+            if qty > 0:
+                cursor.execute("""
+                    INSERT INTO OrderItems (order_id, product_id, quantity)
+                    VALUES (?, ?, ?)
+                """, (order_id, pid, qty))
+                cursor.execute("""
+                    UPDATE Products
+                    SET stock = stock - ?
+                    WHERE id = ?
+                """, (qty, pid))
+
+        db.commit()
+        flash('Заказ создан.', 'success')
+        return redirect(url_for('create_order'))
+
+    return render_template('create_order.html', clients=clients, products=products)
+
+
 @app.route('/')
 def index():
     db = get_db()
