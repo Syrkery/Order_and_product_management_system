@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Список заказов{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список заказов</h1>
+
+{% if orders %}
+    {% for order in orders %}
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+            <strong>Заказ №{{ order.id }}</strong>
+            <span class="text-muted">{{ order.created_at[:10] }} {{ order.created_at[11:16] }}</span>
+        </div>
+        <div class="card-body">
+            <p class="mb-2"><strong>Клиент:</strong> {{ order.client_name }}</p>
+            <ul class="list-group">
+                {% for item in items_by_order[order.id] %}
+                <li class="list-group-item d-flex justify-content-between">
+                    {{ item.name }}
+                    <span class="badge bg-primary rounded-pill">{{ item.quantity }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>Заказов пока нет.</p>
+{% endif %}
+{% endblock %}

@@ -96,6 +96,30 @@ def create_order():
     return render_template('create_order.html', clients=clients, products=products)
 
 
+@app.route('/orders/list')
+@login_required
+def list_orders():
+    db = get_db()
+    orders = db.execute("""
+        SELECT Orders.id, Clients.name AS client_name, Orders.created_at
+        FROM Orders
+        LEFT JOIN Clients ON Orders.client_id = Clients.id
+        ORDER BY Orders.created_at DESC
+    """).fetchall()
+
+    items_by_order = {}
+    for order in orders:
+        items = db.execute("""
+            SELECT Products.name, OrderItems.quantity
+            FROM OrderItems
+            LEFT JOIN Products ON OrderItems.product_id = Products.id
+            WHERE OrderItems.order_id = ?
+        """, (order['id'],)).fetchall()
+        items_by_order[order['id']] = items
+
+    return render_template('orders.html', orders=orders, items_by_order=items_by_order)
+
+
 @app.route('/')
 def index():
     db = get_db()
