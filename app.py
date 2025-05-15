@@ -89,7 +89,8 @@ def create_order():
 
         created_at = datetime.now().isoformat()
         cursor = db.cursor()
-        cursor.execute("""INSERT INTO Orders (client_id, created_at) VALUES (?, ?)""", (client_id, created_at))
+        cursor.execute("""INSERT INTO Orders (client_id, created_at) VALUES (?, ?)""",
+                       (client_id, created_at))
         order_id = cursor.lastrowid
 
         for pid, qty in zip(selected_products, quantities):
@@ -235,7 +236,8 @@ def add_product():
         created_at = datetime.now().isoformat()
 
         db.execute(
-            """INSERT INTO Products (name, price, stock, image, category_id, created_at) VALUES (?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO Products (name, price, stock, image, category_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)""",
             (name, price, stock, image_filename, category_id, created_at))
         db.commit()
         flash('Товар добавлен.', 'success')
